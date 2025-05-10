@@ -19,6 +19,8 @@ class ApiError extends Error {
   }
 }
 
+export { ApiError };
+
 /* 
 It tells V8 to capture the stack trace starting from the caller of the constructor, so that ApiError itself doesn't appear in the stack.
 if we want to store the instance then we can use this.constructor
