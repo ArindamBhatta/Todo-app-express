@@ -1,14 +1,32 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
+if (process.env.PORT) {
+  console.log(`check from cloudinary ${process.env.PORT}`);
+} else {
+  console.log("PORT is not set");
+}
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-//1st store on local then upload in remote
+
 const uploadOnCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
-  } catch (error) {}
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+    });
+    return response;
+  } catch (error) {
+    console.log(`File doesn't upload on cloudinary => ${error}`);
+    fs.unlinkSync(localFilePath);
+    return null;
+  }
 };
+
+export { uploadOnCloudinary };

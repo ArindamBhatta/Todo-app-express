@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 /* 
   step 1: from frontend request body ge get the user details
@@ -18,30 +19,66 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, fullName, password } = req.body;
-  console.log("email:", email);
 
-  //2. create a array and use method some to check if any of the fields are empty
   if ([username, email, fullName, password].some((field) => field === "")) {
     throw new ApiError(400, "All fields are required");
   }
 
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User with email and username already exist");
+    throw new ApiError(409, "User with email or username already exists");
   }
 
-  const avatar = req.files?.avatar[0]?.path;
+  let avatarLocalPath; //file name & file type But it does not send the destination or saved path that part is handled by the Multer
+
+  if (
+    req.files &&
+    Array.isArray(req.files.avatar) &&
+    req.files.avatar.length > 0
+  ) {
+    avatarLocalPath = req.files.avatar[0].path;
+  }
+
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar file is required");
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  console.log(avatar);
 
   if (!avatar) {
-    throw new ApiError(400, "Avatar is required");
+    throw new ApiError(400, "Failed to upload avatar");
   }
 
   const user = await User.create({
+    username: username,
+    email: email,
     fullName: fullName,
     avatar: avatar.url,
+    password: password,
   });
+
+  //again call mongoDB
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken",
+  );
+
+  console.log(
+    "Create user after removing password and refresh-Token",
+    createdUser,
+  );
+
+  if (!createdUser) {
+    throw new ApiError(500, "something went wrong while registering a user");
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, createdUser, "User registered successfully"));
 });
+
 export { registerUser };

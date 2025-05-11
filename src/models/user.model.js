@@ -42,14 +42,19 @@ const userSchema = new Schema(
     timestamps: true,
   },
 );
-
-userSchema.pre("save", async function () {
+//pre and post hooks next is accept in parameter
+userSchema.pre("save", async function (next) {
   //if password isNotModified
-  if (!this.isModified("password")) {
-    return next();
+  if (!this.isModified("password")) return next();
+
+  try {
+    this.password = await bcrypt.hash(this.password, 10);
+    console.log("password after encrypt", this.password);
+    next();
+  } catch (error) {
+    console.log("😭😭 got error");
+    return next(error);
   }
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 //function trigger create access and refresh token database
