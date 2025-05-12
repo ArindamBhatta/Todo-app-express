@@ -19,18 +19,11 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    fullName: {
+    password: {
       type: String,
       required: true,
-      trim: true,
-      index: true,
     },
     avatar: {
-      type: String,
-      required: true,
-    },
-
-    password: {
       type: String,
       required: true,
     },
@@ -52,16 +45,19 @@ userSchema.pre("save", async function (next) {
     console.log("password after encrypt", this.password);
     next();
   } catch (error) {
-    console.log("😭😭 got error");
     return next(error);
   }
 });
 
+userSchema.methods.isPasswordCorrect = async function (password) {
+  const passwordString = password?.toString();
+  return await bcrypt.compare(passwordString, this.password);
+};
+
 //function trigger create access and refresh token database
 
-userSchema.method.generateAccessToken = function () {
-  //payload
-  Jwt.sign(
+userSchema.methods.generateAccessToken = function () {
+  return Jwt.sign(
     {
       _id: this._id,
       email: this.email,
@@ -74,8 +70,8 @@ userSchema.method.generateAccessToken = function () {
   );
 };
 
-userSchema.method.generateRefreshToken = function () {
-  Jwt.sign(
+userSchema.methods.generateRefreshToken = function () {
+  return Jwt.sign(
     {
       _id: this._id,
       email: this.email,
