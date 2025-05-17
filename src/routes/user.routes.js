@@ -5,6 +5,8 @@ import {
   loginUser,
   logoutUser,
   regenerateAccessToken,
+  changeCurrentPassword,
+  updateAccountDetails,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/file.upload.js";
 
@@ -30,11 +32,9 @@ router.route("/logout").post(verifyJwt, logoutUser, clearCookies);
 
 router.route("/refresh-token").post(regenerateAccessToken);
 
-// router.route("/change-password").post(verifyJWT, changeCurrentPassword);
+router.route("/change-password").post(verifyJwt, changeCurrentPassword);
 
-// router.route("/current-user").get(verifyJWT, getCurrentUser);
-
-// router.route("/update-account").patch(verifyJWT, updateAccountDetails);
+router.route("/update-account").patch(verifyJwt, updateAccountDetails);
 
 // router
 //   .route("/avatar")
