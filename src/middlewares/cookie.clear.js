@@ -10,10 +10,9 @@ const clearCookies = (_, res) => {
   res.clearCookie("accessToken", options);
   res.clearCookie("refreshToken", options);
 
-  // Correct the ApiResponse to use statuscode as a number
-  const response = new ApiResponse(200, "User logged out successfully"); // Ensure 200 is passed as the status code
+  const response = new ApiResponse(200, "User logged out successfully");
 
-  res.json(response); // This should now work without error
+  res.json(response);
 };
 
 export { clearCookies };

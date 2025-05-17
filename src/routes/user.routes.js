@@ -4,6 +4,7 @@ import {
   registerUser,
   loginUser,
   logoutUser,
+  regenerateAccessToken,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/file.upload.js";
 
@@ -26,9 +27,17 @@ router.route("/register").post(
 router.route("/login").post(loginUser);
 
 router.route("/logout").post(verifyJwt, logoutUser, clearCookies);
-/* 
-1. verifyJwt → Verifies token from cookie or Authorization header.
-2. logoutUser → Unset refreshToken from DB.
-3. clearCookies → Clears the access token from the client.
-*/
+
+router.route("/refresh-token").post(regenerateAccessToken);
+
+// router.route("/change-password").post(verifyJWT, changeCurrentPassword);
+
+// router.route("/current-user").get(verifyJWT, getCurrentUser);
+
+// router.route("/update-account").patch(verifyJWT, updateAccountDetails);
+
+// router
+//   .route("/avatar")
+//   .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
+
 export default router;

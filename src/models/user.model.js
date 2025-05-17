@@ -105,5 +105,25 @@ If someone steals a JWT (like via XSS or man-in-the-middle attack), they can imp
 
 2. Allow logout and permission changes
 If your app supports logout, revoking permissions, or role changes, an expired token naturally phases out access.
+*/
 
+/* 
+<Header>.<Payload>.<Signature>
+? Header metadata about the algorithm (HS256, etc.)
+? Payload – actual data like:
+{
+  "userId": "1234",
+  "role": "user",
+  "exp": 1700000000
+}
+? Signature – generated using a secret key, based on the header and payload
+
+Is the Payload Sent Over HTTP?
+Yes — the entire JWT (including payload) is sent over HTTP, usually in an HTTP header:
+Authorization: Bearer <your.jwt.token>
+
+The backend extracts the token, decodes it, verifies it, and then trusts the claims inside if the signature is valid.
+
+🤯 Can Someone See or Change the Payload?
+They can view and even modify it, but changing it invalidates the signature
 */
